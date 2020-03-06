@@ -47,6 +47,27 @@ def extract_names(filename):
     """
     names = []
     # +++your code here+++
+    with open(filename, 'r') as document:
+        document_read = document.read()
+        year = re.search(r'Popularity\sin\s(\d\d\d\d)', document_read)
+        if not year:
+            print('Error: Year was not found') 
+            sys.exit(1)
+        names.append(year.group(1))
+        document_names = re.findall(r'<td>(\d+)</td><td>(\w+)</td><td>(\w+)</td>', document_read)
+        if not document_names:
+            print('Error: Names not found')
+            sys.exit(1)
+        names_dict = {}
+        for rank, boy_name, girl_name in document_names:
+            if boy_name not in names_dict:
+                names_dict[boy_name] = rank
+            if girl_name not in names_dict:
+                names_dict[girl_name] = rank
+        sorted_names = sorted(names_dict.keys())
+        for name in sorted_names:
+            names.append(name + ' ' + names_dict[name])
+       
     return names
 
 
@@ -64,6 +85,7 @@ def create_parser():
 def main(args):
     # Create a command-line parser object with parsing rules
     parser = create_parser()
+    
     # Run the parser to collect command-line arguments into a NAMESPACE called 'ns'
     ns = parser.parse_args(args)
 
@@ -82,6 +104,16 @@ def main(args):
     # or to write the list to a summary file e.g. `baby1990.html.summary`
 
     # +++your code here+++
+
+    for file in file_list:
+        names = extract_names(file)
+        text = '\n'.join(names) + '\n'
+        if create_summary:
+            with open(file, 'r'):
+                with open(file + ".summary", 'w') as new_file:
+                    new_file.write(text)
+        else:
+            print(text)
 
 
 if __name__ == '__main__':
